@@ -1,0 +1,39 @@
+{
+  "$schema_note": "Branch-level patch matrix for PHP2Shell (CVE-2026-109618, CVE-2026-109619). The patch checker reads this file. Update fixed_build as PHP ships new patch releases on each branch; this snapshot is current as of the advisory date.",
+  "advisory": {
+    "name": "PHP2Shell",
+    "cves": ["CVE-2026-109618", "CVE-2026-109619"],
+    "ghsa": ["GHSA-w8hw-w9fx-j79w", "GHSA-6wmf-4rv5-p3rp"],
+    "cvss_v4": 9.2,
+    "cvss_vector": "AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+    "class": "CWE-824 (Access of Uninitialized Pointer) / unauthenticated RCE + memory disclosure",
+    "advisory_date": "2026-10-21",
+    "earliest_affected": "5.4",
+    "data_current_as_of": "2026-10-21",
+    "note": "Memory-safety failures in the PHP engine. Every release since 5.4 is affected; application quality is not a mitigation. Distribution and LTS vendors may backport the fix WITHOUT bumping to the upstream fixed build number — always confirm a distro-packaged PHP against your vendor's advisory, not the upstream version string alone."
+  },
+  "branches": [
+    { "branch": "8.5", "status": "active-support",   "fixed_build": "8.5.12", "verdict_if_below": "patch-available", "action": "Upgrade to 8.5.12 and restart every worker." },
+    { "branch": "8.4", "status": "active-support",   "fixed_build": "8.4.27", "verdict_if_below": "patch-available", "action": "Upgrade to 8.4.27 and restart every worker." },
+    { "branch": "8.3", "status": "security-only",    "fixed_build": "8.3.36", "verdict_if_below": "patch-available", "action": "Upgrade to 8.3.36 and restart every worker." },
+    { "branch": "8.2", "status": "security-only",    "fixed_build": "8.2.35", "verdict_if_below": "patch-available", "action": "Upgrade to 8.2.35 and restart every worker; plan the exit before EOL 2026-12-31.", "eol": "2026-12-31" },
+    { "branch": "8.1", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-upstream-fix", "action": "No upstream release. Take a distro/LTS backport or source backport, else isolate or take offline; migrate to 8.4/8.5." },
+    { "branch": "8.0", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-upstream-fix", "action": "No upstream release. Take a distro/LTS backport or source backport, else isolate or take offline; migrate to 8.4/8.5." },
+    { "branch": "7.4", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-upstream-fix", "action": "Source-only backport exists as a bridge. Otherwise isolate or take offline; migrate." },
+    { "branch": "7.3", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline (NSA fallback); migrate off PHP 7." },
+    { "branch": "7.2", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." },
+    { "branch": "7.1", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." },
+    { "branch": "7.0", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." },
+    { "branch": "5.6", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." },
+    { "branch": "5.5", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." },
+    { "branch": "5.4", "status": "end-of-life",      "fixed_build": null,     "verdict_if_below": "no-fix-ever",    "action": "No fix will ship. Isolate or take offline; migrate." }
+  ],
+  "verdicts": {
+    "safe":            { "severity": 0, "label": "SAFE",                    "meaning": "At or above the fixed build on a supported branch. Confirm the running worker was restarted after upgrade." },
+    "patch-available": { "severity": 1, "label": "VULNERABLE — PATCH NOW",  "meaning": "Supported branch below the fixed build. Upgrade and restart workers." },
+    "no-upstream-fix": { "severity": 2, "label": "VULNERABLE — NO UPSTREAM FIX", "meaning": "End-of-life branch with only a backport path. Take a vendor/LTS/source backport or isolate; migrate." },
+    "no-fix-ever":     { "severity": 3, "label": "VULNERABLE — ABANDONED",  "meaning": "End-of-life branch with no backport. Isolate or take offline per NSA; migrate off." },
+    "verify-vendor":   { "severity": 1, "label": "VERIFY WITH VENDOR",      "meaning": "Distro/custom-packaged build: the fix may be backported without bumping the upstream version number. Confirm against your distribution's security advisory before trusting the number alone." },
+    "unknown":         { "severity": 1, "label": "UNKNOWN — TREAT AS EXPOSED", "meaning": "Version could not be parsed or branch not in the matrix. Treat as exposed until verified." }
+  }
+}

@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The Blast Radius — a data-driven scrollytelling briefing on the NSA PHP2Shell advisory (CVE-2026-109618 / 109619). Barry Hurd Intelligence Lab, REF PHP2SHELL-001.">
+<meta property="og:title" content="The Blast Radius — PHP2Shell, Mapped">
+<meta property="og:description" content="Two flaws in the PHP engine put 24 million live sites one unauthenticated request from compromise. A BHIL scroll briefing.">
+<meta property="og:type" content="article">
+<style>
+:root{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>The Blast Radius</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: warm-paper editorial scroll; full-bleed pinned canvas scenes between measured text columns.
+   Single committed visual world (BHIL house register) — colors set explicitly throughout. */
+:root{
+  --paper:#FCFAF6;
+  --paper-2:#F5F1E8;
+  --ink:#1B1F2E;
+  --ink-soft:#4C5266;
+  --muted:#6B7186;
+  --navy:#2A3555;
+  --cobalt:#2F5DBF;
+  --claret:#8A2331;
+  --claret-deep:#581622;
+  --moss:#3E7A55;
+  --line:#D6D0C4;
+  --panel:#12161F;
+  --panel-2:#1A2029;
+  --paper-on-ink:#F2EFE8;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+  --gutter-l:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+  --col:72rem;
+  --text-col:46rem;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:1.0625rem;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{max-width:100%}
+a{color:var(--cobalt);text-decoration:none;border-bottom:1px solid rgba(47,93,191,.35)}
+a:hover{border-bottom-color:var(--cobalt)}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px;border-radius:2px}
+::selection{background:rgba(138,35,49,.16)}
+
+/* ---------- progress bar + frame ---------- */
+#progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:2px;width:0%;background:var(--claret);z-index:60}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:59}
+
+/* ---------- shared shells ---------- */
+.shell{padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.col{max-width:var(--col);margin:0 auto}
+.text-col{max-width:var(--text-col);margin:0 auto}
+.band{padding-block:0}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--claret);display:flex;align-items:center;gap:.65rem;
+}
+.eyebrow::before{content:"▸";color:var(--claret);letter-spacing:0}
+.eyebrow .n{color:var(--muted)}
+h1,h2,h3{font-family:var(--serif);line-height:1.08;margin:0;text-wrap:balance;font-weight:600}
+.act-title{font-size:clamp(2.1rem,5.2vw,3.6rem);letter-spacing:-.015em;margin-top:.9rem}
+.act-dek{
+  font-family:var(--serif);font-style:italic;font-size:clamp(1.12rem,2.3vw,1.4rem);
+  color:var(--ink-soft);line-height:1.45;margin-top:1.1rem;max-width:40ch;text-wrap:balance;
+}
+.prose{margin-top:2.2rem;display:flex;flex-direction:column;gap:1.15rem}
+.prose p{margin:0;max-width:65ch}
+.prose strong{font-weight:600}
+.prose .lead-in{font-weight:600}
+.smallcap{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.serif-note{font-family:var(--serif);font-style:italic;color:var(--ink-soft)}
+.mono-num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- act scaffolding ---------- */
+.act{padding-block:clamp(5rem,11vh,8.5rem) clamp(4rem,9vh,7rem)}
+.act-head{max-width:var(--text-col);margin:0 auto}
+.ringmark{display:flex;justify-content:center;margin:0 auto;padding-block:1rem 2.4rem;opacity:.85}
+.ringmark svg{display:block}
+
+/* ---------- reveals (JS adds .js; resting state stays visible without it) ---------- */
+.js .rv{opacity:0;transform:translateY(16px);transition:opacity .55s cubic-bezier(.22,.61,.36,1),transform .55s cubic-bezier(.22,.61,.36,1)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv2{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
+.js .rv2.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .js .rv,.js .rv2{opacity:1!important;transform:none!important;transition:none!important}
+}
+
+/* ---------- hero ---------- */
+#hero-track{position:relative;height:320vh}
+#hero-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--paper)}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-inner{
+  position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
+  justify-content:space-between;padding-block:clamp(1.2rem,3vh,2.2rem);
+  padding-left:var(--gutter-l);padding-right:var(--gutter-r);
+}
+.hero-top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.hero-top .ref{text-align:right}
+.hero-mid{text-align:center;margin:auto 0}
+.hero-kicker{font-family:var(--mono);font-size:clamp(.66rem,1.6vw,.78rem);letter-spacing:.3em;text-transform:uppercase;color:var(--claret);margin-bottom:1.1rem}
+.hero-title{
+  font-family:var(--serif);font-weight:700;letter-spacing:-.02em;
+  font-size:clamp(3.2rem,11vw,7.8rem);line-height:.96;color:var(--ink);
+}
+.hero-title .thin{font-weight:400;font-style:italic}
+.hero-sub{
+  font-family:var(--serif);font-style:italic;color:var(--ink-soft);
+  font-size:clamp(1.02rem,2.4vw,1.35rem);max-width:46ch;margin:1.4rem auto 0;line-height:1.5;text-wrap:balance;
+}
+.hero-stats{display:flex;justify-content:center;gap:clamp(1.4rem,5vw,4rem);flex-wrap:wrap}
+.hstat{text-align:center;min-width:7.5rem}
+.hstat .v{font-family:var(--serif);font-weight:600;font-size:clamp(1.7rem,4.4vw,2.7rem);line-height:1;font-variant-numeric:tabular-nums}
+.hstat .l{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.5rem}
+.hero-cue{position:absolute;left:50%;bottom:calc(1rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:4;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:.45rem}
+.hero-cue .tick{width:1px;height:34px;background:linear-gradient(var(--muted),transparent);animation:cue 2.2s ease-in-out infinite}
+@keyframes cue{0%,100%{transform:scaleY(.4);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+.hud-note{
+  position:absolute;z-index:3;font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);opacity:0;transition:opacity .5s ease;max-width:30ch;line-height:1.7;
+}
+.hud-note.on{opacity:1}
+.hud-note b{color:var(--claret);font-weight:700}
+#hud-a{left:var(--gutter-l);top:16vh;text-align:left}
+#hud-b{right:var(--gutter-r);bottom:18vh;text-align:right}
+@media (prefers-reduced-motion:reduce){.hero-cue .tick{animation:none}}
+
+/* ---------- ink interlude band ---------- */
+.inkband{background:var(--panel);color:var(--paper-on-ink)}
+.inkband .inner{padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:clamp(3.6rem,8vh,6rem)}
+.inkband .quote{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(1.35rem,3.4vw,2.2rem);line-height:1.38;max-width:34ch;margin:0 auto;text-align:center;text-wrap:balance;
+}
+.inkband .quote b{color:#E8B4BC;font-weight:600}
+.inkband .attr{
+  margin-top:1.6rem;display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:#6CC0E8;
+}
+
+/* ---------- memory chamber (pinned) ---------- */
+#mem-track{position:relative;height:420vh;background:var(--panel)}
+#mem-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:flex;flex-direction:column}
+#mem-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#mem-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,var(--panel) 16%,rgba(18,22,31,.94) 42%,rgba(18,22,31,.55) 70%,transparent)}
+#mem-stage::before{content:"";position:absolute;left:0;right:0;top:0;height:16%;z-index:1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(18,22,31,.85),transparent)}
+.mem-chrome{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:clamp(1rem,2.6vh,1.6rem) var(--gutter-r) 0 var(--gutter-l);
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:#8891A3}
+.mem-chrome .live{color:#E8B4BC}
+.mem-caption{
+  position:absolute;z-index:2;left:var(--gutter-l);right:var(--gutter-r);
+  bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));
+  display:grid;gap:.5rem;max-width:44rem;margin:0 auto;text-align:center;
+  background:rgba(9,12,18,.9);border-top:2px solid var(--claret);
+  padding:1.15rem clamp(1rem,3vw,1.8rem) 1.25rem;
+}
+.mem-step{grid-area:1/1;opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease;pointer-events:none}
+.mem-step.on{opacity:1;transform:none}
+.mem-step .t{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:#E8B4BC}
+.mem-step .d{font-family:var(--serif);font-style:italic;font-size:clamp(1rem,2.4vw,1.3rem);color:var(--paper-on-ink);margin-top:.5rem;line-height:1.45}
+.mem-step .cv{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;color:#8891A3;margin-top:.45rem}
+
+/* ---------- race (pinned timeline) ---------- */
+#race-track{position:relative;height:380vh}
+#race-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;justify-content:center}
+#race-head{padding-left:var(--gutter-l);padding-right:var(--gutter-r);text-align:center;margin-bottom:1rem}
+#race-clock{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,5vw,3rem);font-variant-numeric:tabular-nums;line-height:1}
+#race-clock .d{color:var(--muted);font-size:.55em;font-weight:400;font-style:italic;font-family:var(--serif)}
+#race-sub{font-family:var(--mono);font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:.55rem}
+#race-svgwrap{padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+#race-svg{display:block;width:100%;max-width:68rem;margin:0 auto;height:auto}
+.race-note{
+  padding-left:var(--gutter-l);padding-right:var(--gutter-r);text-align:center;margin-top:.9rem;min-height:3.4em;
+}
+.race-note .inner-note{font-family:var(--serif);font-style:italic;color:var(--ink-soft);font-size:clamp(.98rem,2.2vw,1.22rem);max-width:52ch;margin:0 auto;opacity:0;transition:opacity .4s ease}
+.race-note .inner-note.on{opacity:1}
+
+/* ---------- stat belt ---------- */
+.belt{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-2)}
+.belt .inner{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:var(--col);margin:0 auto;
+  padding-block:2.4rem;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.belt .b{text-align:center}
+.belt .v{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,5.4vw,3.4rem);line-height:1;font-variant-numeric:tabular-nums}
+.belt .v .u{font-size:.55em}
+.belt .l{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.6rem;line-height:1.7}
+@media (max-width:640px){.belt .inner{grid-template-columns:1fr;gap:1.8rem}}
+
+/* ---------- charts (shared plate) ---------- */
+.plate{max-width:var(--col);margin:3rem auto 0;border:1px solid var(--line);background:var(--paper);padding:clamp(1.1rem,3vw,2rem)}
+.plate-title{font-family:var(--serif);font-weight:600;font-size:clamp(1.15rem,2.6vw,1.5rem);letter-spacing:-.01em}
+.plate-sub{font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--ink-soft);margin-top:.3rem}
+.plate-rule{height:1px;background:var(--ink);margin-top:.8rem}
+.plate-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;border-top:1px solid var(--line);margin-top:1.4rem;padding-top:.7rem;flex-wrap:wrap}
+.plate-src{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.plate-sig{text-align:right}
+.plate-sig .s1{font-family:var(--serif);font-weight:600;font-size:.74rem}
+.plate-sig .s2{font-family:var(--mono);font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+.chartbox{margin-top:1.3rem}
+.chartbox svg{display:block;width:100%;height:auto}
+
+/* tier dotplot rows drawn in SVG; waffle in DOM */
+#waffle-wrap{display:flex;gap:clamp(1.4rem,4vw,3rem);align-items:flex-start;flex-wrap:wrap;margin-top:1.3rem}
+#waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;width:min(100%,21rem);flex:0 1 21rem}
+#waffle .sq{aspect-ratio:1;border-radius:3px;background:var(--line);transition:background .45s ease,transform .45s ease;transform:scale(.6)}
+.js #waffle.go .sq{transform:scale(1)}
+#waffle .sq.v8{background:var(--navy)}
+#waffle .sq.v7{background:var(--claret)}
+#waffle .sq.v5{background:var(--claret-deep)}
+.no-js #waffle .sq{transform:none}
+#waffle-legend{flex:1 1 16rem;min-width:0;display:flex;flex-direction:column;gap:1.05rem}
+.wl{display:grid;grid-template-columns:14px 1fr auto;gap:.7rem;align-items:baseline}
+.wl .sw{width:14px;height:14px;border-radius:3px;position:relative;top:2px}
+.wl .h{font-weight:600;font-size:.98rem}
+.wl .d{grid-column:2/4;font-size:.85rem;color:var(--ink-soft);line-height:1.55}
+.wl .pct{font-family:var(--mono);font-size:.92rem;font-variant-numeric:tabular-nums}
+#waffle-call{border-top:1px solid var(--line);padding-top:.9rem;font-family:var(--serif);font-style:italic;color:var(--claret);font-size:1.02rem;line-height:1.5}
+
+/* matrix table */
+.mx-wrap{overflow-x:auto;margin-top:1.3rem}
+table.mx{width:100%;border-collapse:collapse;min-width:680px}
+table.mx th{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;
+  text-align:left;padding:.5rem .9rem .5rem 0;border-bottom:1.5px solid var(--ink)}
+table.mx td{padding:.72rem .9rem .72rem 0;border-bottom:1px solid var(--line);vertical-align:top;font-size:.92rem;line-height:1.5}
+table.mx td.cat{font-weight:600;white-space:nowrap}
+table.mx td.tier{font-family:var(--mono);font-size:.82rem;white-space:nowrap}
+table.mx td.vol{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.88rem;white-space:nowrap}
+table.mx tr.hot td.vol,table.mx tr.hot td.tier{color:var(--claret)}
+table.mx td.risk{color:var(--ink-soft)}
+
+/* econ bars */
+#econ{display:flex;flex-direction:column;gap:1.7rem;margin-top:1.6rem}
+.eb .top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.eb .lab{font-weight:600;font-size:1rem}
+.eb .sub{font-size:.84rem;color:var(--muted);margin-top:.15rem}
+.eb .val{font-family:var(--mono);font-weight:700;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.eb.hot .val{color:var(--claret)}
+.eb .rail{height:20px;background:var(--paper-2);border:1px solid var(--line);margin-top:.6rem;position:relative}
+.eb .fill{position:absolute;inset:0 auto 0 0;width:0%;background:var(--navy);transition:width 1.4s cubic-bezier(.22,.61,.36,1)}
+.eb.hot .fill{background:var(--claret)}
+.no-js .eb .fill{transition:none}
+.econ-foot{font-family:var(--serif);font-style:italic;color:var(--ink-soft);font-size:.98rem;margin-top:1.5rem;line-height:1.55}
+
+/* telemetry + versions cards */
+.tele{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:1.6rem}
+.tele .cell{background:var(--paper);padding:1rem 1.1rem;min-width:0}
+.tele .who{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--claret)}
+.tele .who.cool{color:var(--moss)}
+.tele .claim{font-size:.9rem;line-height:1.5;margin-top:.45rem}
+.tele .read{font-family:var(--serif);font-style:italic;font-size:.84rem;color:var(--muted);margin-top:.5rem}
+
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1rem;margin-top:1.6rem}
+.vcard{border:1px solid var(--line);padding:1.05rem 1.15rem;background:var(--paper)}
+.vcard.fixed{border-top:3px solid var(--navy)}
+.vcard.dead{border-top:3px solid var(--claret)}
+.vcard .b{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem}
+.vcard .br{font-family:var(--serif);font-weight:600;font-size:1.25rem}
+.vcard .fx{font-family:var(--mono);font-size:.86rem;font-variant-numeric:tabular-nums}
+.vcard.dead .fx{color:var(--claret)}
+.vcard .st{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:.35rem}
+.vcard .od{font-size:.86rem;color:var(--ink-soft);margin-top:.55rem;line-height:1.5}
+
+/* ---------- defense orders ---------- */
+.phase{display:grid;grid-template-columns:minmax(9rem,13rem) 1fr;gap:clamp(1.2rem,3.5vw,3rem);margin-top:2.6rem;max-width:var(--col);margin-inline:auto}
+.phase .rail-h{position:sticky;top:calc(env(safe-area-inset-top,0px) + 1.2rem);align-self:start}
+.phase .ph-n{font-family:var(--mono);font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--claret)}
+.phase .ph-t{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin-top:.4rem;line-height:1.2}
+.phase .ph-w{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:.45rem;font-variant-numeric:tabular-nums}
+.phase ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem}
+.phase li{display:grid;grid-template-columns:auto 1fr;gap:.7rem;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:1rem}
+.phase li:last-child{border-bottom:0}
+.phase li::before{content:"▸";color:var(--claret);font-family:var(--mono);font-size:.8rem}
+.phase li b{font-weight:600}
+.phase li .why{display:block;font-size:.88rem;color:var(--ink-soft);margin-top:.3rem}
+.phase li code{font-family:var(--mono);font-size:.82em;background:var(--paper-2);border:1px solid var(--line);padding:.06em .4em;border-radius:3px;white-space:nowrap}
+@media (max-width:720px){.phase{grid-template-columns:1fr}.phase .rail-h{position:static}}
+
+/* action register */
+.reg{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:1.6rem}
+.reg .row{display:grid;grid-template-columns:3.4rem 1fr auto;gap:1rem;background:var(--paper);padding:.9rem 1.05rem;align-items:baseline}
+.reg .p{font-family:var(--mono);font-weight:700;font-size:.8rem}
+.reg .p.p0{color:var(--claret)}
+.reg .p.p1{color:var(--navy)}
+.reg .p.p2,.reg .p.p3{color:var(--muted)}
+.reg .a{font-size:.92rem;line-height:1.5;min-width:0}
+.reg .a .own{display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.3rem}
+.reg .t{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.reg .row{grid-template-columns:2.6rem 1fr}.reg .t{grid-column:2;justify-self:start}}
+
+/* caveats */
+.cavs{display:flex;flex-direction:column;gap:1.15rem;margin-top:2rem}
+.cav{display:grid;grid-template-columns:auto 1fr;gap:.7rem;align-items:baseline;max-width:65ch}
+.cav::before{content:"▸";color:var(--claret);font-family:var(--mono);font-size:.8rem}
+.cav b{font-weight:600}
+
+/* ---------- colophon / contact (ink) ---------- */
+.endband{background:var(--panel);color:var(--paper-on-ink)}
+.endband .inner{max-width:var(--col);margin:0 auto;padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:clamp(3.4rem,8vh,5.5rem)}
+.end-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(2rem,6vw,5rem)}
+@media (max-width:760px){.end-grid{grid-template-columns:1fr}}
+.endband h3{font-family:var(--serif);font-weight:600;font-size:1.6rem}
+.colo{margin-top:1.4rem;display:flex;flex-direction:column}
+.colo .r{display:flex;gap:1rem;justify-content:space-between;align-items:baseline;border-bottom:1px solid #2A313E;padding-block:.6rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+.colo .k{color:#8891A3;white-space:nowrap}
+.colo .v{color:var(--paper-on-ink);text-align:right}
+.srcs{margin:1.4rem 0 0;padding:0;list-style:none;columns:2;column-gap:2.2rem;font-size:.8rem;color:#A7AEBD}
+.srcs li{break-inside:avoid;padding-block:.28rem;border-bottom:1px solid #222935;line-height:1.45}
+.srcs li b{color:var(--paper-on-ink);font-weight:500}
+.srcs li .gr{font-family:var(--mono);font-size:.64rem;color:#6CC0E8;margin-left:.4rem}
+@media (max-width:640px){.srcs{columns:1}}
+.contact{border:1px solid #2A313E;padding:1.5rem 1.6rem;margin-top:1.4rem;background:var(--panel-2)}
+.contact .cb-name{font-family:var(--serif);font-weight:600;font-size:1.25rem}
+.contact .cb-tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:#8891A3;margin-top:.5rem}
+.contact .cb-rows{margin-top:1.2rem;display:flex;flex-direction:column;gap:.55rem;font-family:var(--mono);font-size:.8rem}
+.contact .cb-rows span{color:#8891A3;margin-right:.6rem;letter-spacing:.12em}
+.contact a{color:#6CC0E8;border-bottom-color:rgba(108,192,232,.35)}
+.endfoot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:baseline;border-top:1px solid #2A313E;margin-top:2.6rem;padding-top:1.1rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:#8891A3}
+.endfoot .sig{color:var(--paper-on-ink)}
+
+/* tiny helpers */
+.hairline{height:1px;background:var(--line);max-width:var(--col);margin:0 auto}
+.tl-note{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);line-height:1.8}
+</style>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ========== HERO · THE DETONATION FIELD ========== -->
+<section id="hero-track" aria-label="PHP2Shell — the blast radius">
+  <div id="hero-stage">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hud-note" id="hud-a"><b>ONE REQUEST.</b><br>UNAUTHENTICATED · MULTIPART POST<br>BEFORE ANY APPLICATION CODE RUNS</div>
+    <div class="hud-note" id="hud-b">EVERY DOT ≈ 9,400 LIVE SITES<br><b>CLARET = INSIDE THE RADIUS</b></div>
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div>Barry Hurd Intelligence Lab</div>
+        <div class="ref">Scroll Briefing · REF PHP2SHELL-001<br>TLP:CLEAR · OCT 21 2026</div>
+      </div>
+      <div class="hero-mid">
+        <div class="hero-kicker">The NSA PHP Advisory, Mapped</div>
+        <h1 class="hero-title">The Blast<br><span class="thin">Radius</span></h1>
+        <p class="hero-sub">Two flaws in the PHP engine put twenty-four million live sites one unauthenticated request from compromise. Scroll to watch the shockwave travel.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="v mono-num" data-count="24429280" data-fmt="m">24.4M</div><div class="l">Live PHP Sites</div></div>
+        <div class="hstat"><div class="v mono-num" data-count="9218655" data-fmt="m">9.2M</div><div class="l">Hosted in the U.S.</div></div>
+        <div class="hstat"><div class="v">9.2<span style="font-size:.5em"> / CVSS</span></div><div class="l">Both CVEs · v4.0</div></div>
+        <div class="hstat"><div class="v">4</div><div class="l">Safe Builds</div></div>
+      </div>
+    </div>
+    <div class="hero-cue" id="hero-cue"><span>Scroll</span><span class="tick"></span></div>
+  </div>
+</section>
+
+<!-- ========== NSA DIRECTIVE ========== -->
+<div class="inkband" id="directive">
+  <div class="inner">
+    <p class="quote">“If an immediate update is not feasible, it is recommended that organizations <b>take the system offline</b> until it can be fully mitigated.”</p>
+    <div class="attr"><span>NSA Press Release · Oct 21 2026</span><span>·</span><span>Directive</span></div>
+  </div>
+</div>
+
+<!-- ========== ACT 01 · THE WEAPON ========== -->
+<section class="act shell" id="act-weapon">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 01</span><span>The Weapon</span></div>
+    <h2 class="act-title rv">A five-sentence advisory, a decade-deep flaw</h2>
+    <p class="act-dek rv">What Fort Meade said, what it left out, and what the engineering record actually shows.</p>
+    <div class="prose">
+      <p class="rv">On October 21, 2026, the National Security Agency published a press release titled <em>NSA Advisory: PHP Updates</em>. It runs five sentences. It names no CVE, no version, no adversary. It tells every organization running PHP to prepare for an update addressing “two critical vulnerabilities” that “often provide a direct path to the server's file system or database” — and, if updating is not feasible, to take the system offline.</p>
+      <p class="rv">The technical substance arrived the same day from the PHP project, CISA, CERT-EU, and the UK NCSC. <strong>CVE-2026-109618</strong> and <strong>CVE-2026-109619</strong> — researchers call the pair <strong>PHP2Shell</strong> — are memory-safety failures in the engine itself: one rides the <code style="font-family:var(--mono);font-size:.88em">memory_limit</code> out-of-memory abort, the other consumes engine state that survives a fatal error. Both score CVSS v4.0 9.2. Every PHP release since 5.4 is affected. Exactly four builds are safe: 8.5.12, 8.4.27, 8.3.36, and 8.2.35.</p>
+      <p class="rv">Because the flaw sits beneath the application, application quality is no defense — Wiz notes that “even a simple 'Hello World' application running on an affected PHP version can be vulnerable.” And the High attack-complexity rating holding the score under 10 is a lagging indicator: Wiz's central finding is that frontier AI collapsed that complexity — “a single researcher completed in a week what previously would have taken a world-class team months of work.”</p>
+      <p class="rv serif-note">What follows is the failure sequence, reconstructed cell by cell. Scroll through the chamber.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PINNED · MEMORY CHAMBER ========== -->
+<section id="mem-track" aria-label="How PHP2Shell corrupts engine memory">
+  <div id="mem-stage">
+    <canvas id="mem-canvas" aria-hidden="true"></canvas>
+    <div class="mem-chrome">
+      <div>Worker Heap · PHP-FPM Pool</div>
+      <div class="live" id="mem-phase">PHASE 0 · IDLE</div>
+    </div>
+    <div class="mem-caption" id="mem-caption">
+      <div class="mem-step" data-step="0">
+        <div class="t">00 · A worker at rest</div>
+        <div class="d">A PHP worker holds its heap in order — request data, session state, engine globals, each cell owned and accounted for.</div>
+        <div class="cv">ANY WEB SAPI · FPM / MOD_PHP / CGI / LITESPEED / FRANKENPHP</div>
+      </div>
+      <div class="mem-step" data-step="1">
+        <div class="t">01 · The request lands</div>
+        <div class="d">One unauthenticated multipart POST. No login, no application route — the engine begins parsing the upload before any application code runs.</div>
+        <div class="cv">DEMONSTRATED PRE-AUTH ON APACHE MOD_PHP</div>
+      </div>
+      <div class="mem-step" data-step="2">
+        <div class="t">02 · The abort</div>
+        <div class="d">The payload drives memory past <b>memory_limit</b>. PHP enforces the limit with a longjmp() abort — mid-parse, with request data only half-initialized.</div>
+        <div class="cv">CVE-2026-109618 · OOM ABORT · CWE-824</div>
+      </div>
+      <div class="mem-step" data-step="3">
+        <div class="d">Cleanup treats invalid data as valid and frees attacker-influenced memory. Stale engine state survives into the next request on the same worker.</div>
+        <div class="t" style="order:-1">03 · The corruption</div>
+        <div class="cv">CVE-2026-109619 · USE-AFTER-FREE ACROSS REQUESTS</div>
+      </div>
+      <div class="mem-step" data-step="4">
+        <div class="t">04 · Two ways out</div>
+        <div class="d">Path one: remote code execution as the web-server user. Path two — no RCE needed — freed worker memory echoes back inside a PHPSESSID cookie: passwords, tokens, TLS keys.</div>
+        <div class="cv">WIZ · CALIF POC — RCE &nbsp;·&nbsp; HEARTBLEED-STYLE DISCLOSURE</div>
+      </div>
+      <div class="mem-step" data-step="5">
+        <div class="t">05 · The NSA warning, made literal</div>
+        <div class="d">“A direct path to the server's file system or database.” From here: webshells, Magecart skimmers, ransomware pivots, botnet conscription.</div>
+        <div class="cv">FIXED ONLY IN 8.5.12 / 8.4.27 / 8.3.36 / 8.2.35</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ACT 02 · THE RACE ========== -->
+<section class="act shell" id="act-race">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 02</span><span>The Race</span></div>
+    <h2 class="act-title rv">The patch was racing its own leak</h2>
+    <p class="act-dek rv">Coordination failed twice before release day. Attackers read the fix before most defenders did.</p>
+    <div class="prose">
+      <p class="rv">This is not a classic zero-day. It is a leaked-before-patch vulnerability that became an n-day within hours: CVE identifiers escaped on October 20, an exploit demo video posted in error, and pre-release hardened container images handed attackers a diffable fix six hours early. Sansec had predicted mass attacks within fifteen minutes of the patch. Scroll through the thirty-six hours.</p>
+    </div>
+  </div>
+</section>
+
+<section id="race-track" aria-label="36-hour disclosure timeline">
+  <div id="race-stage">
+    <div id="race-head">
+      <div id="race-clock">OCT 20 · 12:00<span class="d"> UTC</span></div>
+      <div id="race-sub">Disclosure · Defense · Attack — the vertical rule is the coordinated release</div>
+    </div>
+    <div id="race-svgwrap"><svg id="race-svg" viewBox="0 0 1000 430" role="img" aria-label="Timeline of disclosure, defense, and attack events, October 20 to 22, 2026"></svg></div>
+    <div class="race-note"><div class="inner-note" id="race-note"></div></div>
+  </div>
+</section>
+
+<section class="act shell" style="padding-top:2rem" id="act-race-close">
+  <div class="act-head">
+    <div class="prose">
+      <p class="rv"><span class="lead-in">Where the telemetry stands.</span> Cloudflare reports attack traffic from 07:43 UTC — six hours before the coordinated release — and watchTowr and Hadrian report active attempts after it. Patchstack sees probing only; Huntress sees nothing on partner systems; CISA “has not observed exploitation”; neither CVE sits on the KEV catalog. Read the split honestly: unverified vendor telemetry in motion, a confirmation lag, and no proof of safety. No reviewed reporting names an APT.</p>
+    </div>
+    <div class="tele rv">
+      <div class="cell"><div class="who">Cloudflare</div><div class="claim">“Observed attack traffic targeting our customers” from 07:43; WAF rules live since 03:02.</div><div class="read">The strongest early signal — pre-release.</div></div>
+      <div class="cell"><div class="who">Hadrian</div><div class="claim">Exploitation “at scale,” mostly via the session upload-progress path.</div><div class="read">Vendor telemetry; unverified.</div></div>
+      <div class="cell"><div class="who">watchTowr</div><div class="claim">“Active exploitation attempts” against both CVEs at 14:19.</div><div class="read">The post-release scanning wave.</div></div>
+      <div class="cell"><div class="who cool">Patchstack</div><div class="claim">Probing only — “no hard evidence of breaches yet.”</div><div class="read">The counterweight to “at scale.”</div></div>
+      <div class="cell"><div class="who cool">CISA</div><div class="claim">“Has not observed exploitation of these vulnerabilities as of the time of publication.”</div><div class="read">No federal confirmation; KEV unlisted.</div></div>
+      <div class="cell"><div class="who cool">PHP Security Team</div><div class="claim">“Did not identify any functional exploits at the time of release.”</div><div class="read">Official stance at release.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ACT 03 · THE TARGET FIELD ========== -->
+<section class="act shell" id="act-targets" style="padding-top:3rem">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 03</span><span>The Target Field</span></div>
+    <h2 class="act-title rv">Value in 2,700 sites. Volume in 23.6 million.</h2>
+    <p class="act-dek rv">BuiltWith's census turns a technical advisory into a map of who, exactly, is standing in the open.</p>
+    <div class="prose">
+      <p class="rv">Four risk profiles share one engine flaw. High-visibility properties — BuiltWith's PHP lists include cnbc.com, t-mobile.com, nist.gov, un.org, delta.com, morganstanley.com — often fingerprinted on subdomains and inner pages, which still hands attackers reach and a perimeter foothold. Revenue-bearing enterprises, whose PHP estate sits beside payment flows and internal networks. Transactional commerce — Magento, WooCommerce, Shopware are all PHP, and Sansec stresses these stores “are exposed even when their own code is clean.” And the long tail, whose patching belongs to whoever runs the hosting.</p>
+    </div>
+  </div>
+
+  <figure class="plate rv" style="margin-top:3rem" id="tier-plate">
+    <figcaption>
+      <div class="plate-title">The exposure paradox</div>
+      <div class="plate-sub">Live PHP sites by BuiltWith exposure tier, October 21 2026 · log scale — claret tiers are the prime targets</div>
+    </figcaption>
+    <div class="plate-rule"></div>
+    <div class="chartbox"><svg id="tier-svg" viewBox="0 0 1000 560" role="img" aria-label="Dot plot of exposure tiers from 102 mega-stores to 23.6 million long-tail sites on a log scale"></svg></div>
+    <div class="plate-foot">
+      <div class="plate-src">Source&ensp;BuiltWith PHP Usage Trends · Oct 21 2026</div>
+      <div class="plate-sig"><div class="s1">BHIL — Barry Hurd Intelligence Lab</div><div class="s2">Human-Directed. AI-Enabled. Commercially Tested.</div></div>
+    </div>
+  </figure>
+
+  <div class="act-head" style="margin-top:3.5rem">
+    <h3 class="rv" style="font-size:1.5rem">The Exposure Matrix</h3>
+    <div class="mx-wrap rv">
+      <table class="mx">
+        <thead><tr><th>Exposure Category</th><th>Risk Tier</th><th>Volume of Sites</th><th>Primary Risk Profile / Motivation for Attackers</th></tr></thead>
+        <tbody id="mx-body"></tbody>
+      </table>
+    </div>
+    <p class="tl-note rv" style="margin-top:1rem">Tiers overlap — views of one population, never additive. The top-10K count is a floor: W3Techs finds PHP on 59.7% of top-10K sites with a known server-side language.</p>
+  </div>
+</section>
+
+<div class="belt rv" id="belt-botnet">
+  <div class="inner">
+    <div class="b"><div class="v mono-num" data-count="236000" data-fmt="k">236,000</div><div class="l">Servers captured if just 1% of the long tail falls — botnet capacity rarely available from one bug</div></div>
+    <div class="b"><div class="v mono-num" data-count="883717" data-fmt="comma">883,717</div><div class="l">Internet-facing hosts still advertising PHP ≤ 8.1 on Oct 20 — 59% of all that disclose a version</div></div>
+    <div class="b"><div class="v"><span class="mono-num" data-count="79" data-fmt="plain">79</span><span class="u">M</span></div><div class="l">Expired PHP sites — the decommissioning failure that built today's unpatched estate</div></div>
+  </div>
+</div>
+
+<!-- ========== ACT 04 · THE UNPATCHABLE THIRD ========== -->
+<section class="act shell" id="act-third">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 04</span><span>The Unpatchable Third</span></div>
+    <h2 class="act-title rv">One in three live PHP sites cannot take the patch</h2>
+    <p class="act-dek rv">The fix exists. For eight and a half million sites, it will simply never arrive.</p>
+    <div class="prose">
+      <p class="rv">W3Techs' version census puts 65.2% of PHP sites on PHP 8, 27.0% on PHP 7, and 7.8% on PHP 5 or 4. Applied to BuiltWith's live count, roughly 8.5 million sites — about 3.2 million of them U.S.-hosted — run versions with no upstream fix. PHP 7.4 gets a minimal source-only backport. Everything older gets nothing, ever. The NSA fallback applies: isolate, or take it offline.</p>
+      <p class="rv">The precedent says this stays dangerous for years. CVE-2024-4577, the previous PHP-CGI RCE, was weaponized by TellYouThePass ransomware within about two days of its June 2024 patch — and seven months later GreyNoise still logged 1,089 unique IPs attempting it, with 79 public exploits circulating.</p>
+    </div>
+  </div>
+
+  <figure class="plate rv" id="waffle-plate">
+    <figcaption>
+      <div class="plate-title">Version mix and the no-fix population</div>
+      <div class="plate-sub">100-unit waffle — W3Techs version share applied to BuiltWith's 24.4M live PHP sites · each square ≈ 244,000 sites</div>
+    </figcaption>
+    <div class="plate-rule"></div>
+    <div id="waffle-wrap">
+      <div id="waffle" role="img" aria-label="Waffle chart: 65 of 100 squares patchable PHP 8, 27 end-of-life PHP 7, 8 abandoned PHP 5 and 4"></div>
+      <div id="waffle-legend">
+        <div class="wl"><span class="sw" style="background:var(--navy)"></span><span class="h">PHP 8.x — a fix shipped</span><span class="pct">65.2%</span><span class="d">Fixed builds 8.5.12 · 8.4.27 · 8.3.36 · 8.2.35. Patched only once upgraded and every worker restarted.</span></div>
+        <div class="wl"><span class="sw" style="background:var(--claret)"></span><span class="h">PHP 7.x — end of life</span><span class="pct">27.0%</span><span class="d">No official release. 7.4 gets a source-only backport; 7.3 and older get nothing.</span></div>
+        <div class="wl"><span class="sw" style="background:var(--claret-deep)"></span><span class="h">PHP 5.x / 4.x — abandoned</span><span class="pct">7.8%</span><span class="d">No fix will ever ship. Isolate or take offline.</span></div>
+        <div id="waffle-call">≈8.5M live sites have no upstream patch — ≈3.2M of them hosted in the United States.</div>
+      </div>
+    </div>
+    <div class="plate-foot">
+      <div class="plate-src">Source&ensp;W3Techs version share × BuiltWith live-site count</div>
+      <div class="plate-sig"><div class="s1">BHIL — Barry Hurd Intelligence Lab</div><div class="s2">Human-Directed. AI-Enabled. Commercially Tested.</div></div>
+    </div>
+  </figure>
+
+  <div class="act-head" style="margin-top:3rem">
+    <h3 class="rv" style="font-size:1.5rem">Branch by branch</h3>
+    <div class="vgrid" id="vgrid"></div>
+  </div>
+</section>
+
+<!-- ========== ACT 05 · THE DAMAGES ========== -->
+<section class="act shell" id="act-damages" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 05</span><span>The Damages</span></div>
+    <h2 class="act-title rv">A 10% breach rate in the $100M tier is a $1.3B event</h2>
+    <p class="act-dek rv">Priced against the benchmarks boards already trust — and against the NSA's own fallback order.</p>
+    <div class="prose">
+      <p class="rv">Code execution on a commerce backend yields five things: database credentials and payment-gateway keys; the power to rewrite checkout JavaScript — the Magecart precondition; bulk customer data; a ransomware pivot point; and, via the memory-disclosure path, secrets even where RCE fails. The benchmarks: IBM's 2026 U.S. average breach is $11.5M. Coveware's average ransom payment is $1.88M against a $150K median. British Airways drew a proposed £183.39M fine — £20M final — from a skimmer that ran eleven days.</p>
+    </div>
+  </div>
+
+  <figure class="plate rv" id="econ-plate">
+    <figcaption>
+      <div class="plate-title">Modeled loss scenarios — the $100M+ tier</div>
+      <div class="plate-sub">1,155 PHP sites with $100M+ in sales · IBM 2026 U.S. breach-cost basis · illustrative exposure models, not forecasts</div>
+    </figcaption>
+    <div class="plate-rule"></div>
+    <div id="econ"></div>
+    <p class="econ-foot">Off the chart: a full-tier breach ≈ <b class="mono-num">$13.3B</b>. The downtime bar is the number executives should stare at — the official mitigation for unpatchable systems is going offline, so delay converts directly into lost revenue, and this floor runs two orders of magnitude under ITIC's cross-industry downtime rates. A two-to-four-hour controlled maintenance window is trivial next to a single breach. Authorize the change window today.</p>
+    <div class="plate-foot">
+      <div class="plate-src">Source&ensp;BHIL exposure model · IBM CODB 2026 · Coveware Q2 2026 · ICO penalty notice</div>
+      <div class="plate-sig"><div class="s1">BHIL — Barry Hurd Intelligence Lab</div><div class="s2">Human-Directed. AI-Enabled. Commercially Tested.</div></div>
+    </div>
+  </figure>
+</section>
+
+<!-- ========== ACT 06 · DEFENSE ORDERS ========== -->
+<section class="act shell" id="act-orders">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Act 06</span><span>Defense Orders</span></div>
+    <h2 class="act-title rv">Seventy-two hours to a defensible estate</h2>
+    <p class="act-dek rv">Three phases, mapped to the NSA and CISA directives. Any host reachable and unpatched after October 20 is treated as potentially compromised.</p>
+  </div>
+
+  <div class="phase rv">
+    <div class="rail-h"><div class="ph-n">Phase 1</div><div class="ph-t">Identify &amp; Isolate</div><div class="ph-w">H+0 – H+12</div></div>
+    <ul>
+      <li><div><b>Inventory from runtime evidence, not banners.</b><span class="why">Check loaded binaries in running processes — web servers, containers, CI runners, cPanel/Plesk, vendor appliances, Windows software bundling <code>php-cgi.exe</code>. NCSC-NL's php2shell repository flags products that embed PHP.</span></div></li>
+      <li><div><b>Rank by exposure × value.</b><span class="why">Internet-facing Apache mod_php first — the confirmed pre-application path — then checkout, payment, and authentication systems, then regulated data, then the rest.</span></div></li>
+      <li><div><b>Demand written patch attestations.</b><span class="why">Hosts, agencies, SaaS vendors, appliance suppliers. CERT-EU: products using PHP as a backend may be affected “even if they do not directly expose a PHP installation.”</span></div></li>
+      <li><div><b>Isolate what cannot patch today.</b><span class="why">Network ACLs, VPN-only, or a static page with PHP-FPM stopped. Application maintenance modes do not help — PHP parses the request before the app checks the flag.</span></div></li>
+      <li><div><b>Preserve evidence on suspect hosts first.</b><span class="why">Restarting workers wipes the in-memory state CVE-2026-109619 abuses.</span></div></li>
+    </ul>
+  </div>
+
+  <div class="phase rv">
+    <div class="rail-h"><div class="ph-n">Phase 2</div><div class="ph-t">Mitigate — Stopgaps Only</div><div class="ph-w">H+0 – H+16</div></div>
+    <ul>
+      <li><div><b>Edge rules on, eyes open.</b><span class="why">Vendor PHP2Shell rulesets — Cloudflare's were live from 03:02 UTC; Fastly, Akamai, Imperva shipped equivalents. Cloudflare's own CTO calls them “a STOPGAP only.”</span></div></li>
+      <li><div><b>Block the trigger class.</b><span class="why">Every known trigger is a multipart/form-data request. Reject multipart at nginx/Apache, or allow only GET/HEAD on read-only storefronts. It breaks uploads — test it.</span></div></li>
+      <li><div><b>Apply the php.ini set together, then restart every worker.</b><span class="why"><code>session.upload_progress.enabled=0</code> · <code>memory_limit=-1</code> via php_admin_value paired with cgroup caps, never RLIMIT · a low <code>post_max_size</code> · on 8.5, <code>fatal_error_backtraces=0</code>. Pool level, not ini_set().</span></div></li>
+      <li><div><b>Know the limit.</b><span class="why">PHP: these measures “do not make an installation safe.” Core developer Gina Peter Banyard: “the only mitigation is patching / upgrading PHP.” Mitigations buy hours, not weeks.</span></div></li>
+      <li><div><b>Watch the tells.</b><span class="why">php-fpm/httpd spawning shells or downloaders; multipart bursts ending in memory-limit errors; oversized PHPSESSID cookies; worker churn; new .php files; new cron jobs, users, keys.</span></div></li>
+    </ul>
+  </div>
+
+  <div class="phase rv">
+    <div class="rail-h"><div class="ph-n">Phase 3</div><div class="ph-t">Patch &amp; Verify</div><div class="ph-w">H+0 – H+72</div></div>
+    <ul>
+      <li><div><b>Upgrade, then restart everything.</b><span class="why">Fixed builds or vendor backports — a patched binary on disk does not protect a running worker.</span></div></li>
+      <li><div><b>Verify from a web request, never CLI.</b><span class="why">Pool and CLI configs differ. Confirm version and effective ini values, then close the loop with authenticated scans — Tenable, Qualys, Rapid7 checks shipped day one.</span></div></li>
+      <li><div><b>Assume breach for the exposure window.</b><span class="why">Hunt webshells and persistence; rotate database credentials, API keys, session secrets, TLS keys — the leak path harvests them without RCE; run integrity scans on checkout pages.</span></div></li>
+      <li><div><b>Back out the stopgaps.</b><span class="why">Multipart blocks and memory_limit=-1 are not permanent architecture.</span></div></li>
+    </ul>
+  </div>
+
+  <div class="act-head" style="margin-top:3.5rem">
+    <h3 class="rv" style="font-size:1.5rem">Action register</h3>
+    <div class="reg rv" id="reg"></div>
+    <div class="prose"><p class="rv" style="margin-top:1.6rem"><span class="lead-in">The legacy strategy, in one breath.</span> Contain first — reverse proxy stripping multipart, strict limits, segmentation; that is what “fully mitigated” means for unpatchable code. Buy time with LTS backports, hard expiry attached — PHP 8.2 itself dies December 31, 2026. Run a time-boxed, AI-assisted compatibility sprint to 8.4/8.5 — the same acceleration that weaponized PHP2Shell cuts migration effort. Strangler-fig what remains. And record a risk acceptance, with an owner and a review date, for every system that stays online unpatched.</p></div>
+  </div>
+</section>
+
+<!-- ========== CAVEATS ========== -->
+<section class="act shell" id="act-caveats" style="padding-top:2rem">
+  <div class="act-head">
+    <div class="eyebrow rv"><span class="n">Appendix</span><span>Analytic Caveats</span></div>
+    <h2 class="act-title rv" style="font-size:clamp(1.8rem,4vw,2.6rem)">Where this assessment is soft</h2>
+    <div class="cavs">
+      <div class="cav rv2"><div><b>The NSA release is thin.</b> No CVEs, versions, or indicators — the technical record comes from PHP, CISA, CERT-EU, NCSC, and vendor research. The promised follow-up may change the recommended controls.</div></div>
+      <div class="cav rv2"><div><b>Exploitation telemetry conflicts.</b> Cloudflare, watchTowr, and Hadrian report attacks; CISA, PHP, Huntress, and BSI report no confirmed compromise as of October 21. All of it is unverified vendor telemetry in motion.</div></div>
+      <div class="cav rv2"><div><b>The economic model is illustrative.</b> Breach-rate scenarios are assumptions, not forecasts; IBM figures average across breach types; Coveware's mean is skewed by outliers; downtime uses revenue floors.</div></div>
+      <div class="cav rv2"><div><b>Sources measure different things.</b> BuiltWith counts fingerprinted sites; W3Techs measures share among sites with a detectable language; Shodan-style counts measure hosts. Never sum the tiers.</div></div>
+      <div class="cav rv2"><div><b>Some circulating numbers are wrong.</b> “70% of the internet” is W3Techs' share of sites with a known server-side language (69.3%); pre-release claims of CVSS 10.0 and “all versions since 2004” were incorrect.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== COLOPHON + CONTACT ========== -->
+<div class="endband">
+  <div class="inner">
+    <div class="end-grid">
+      <div>
+        <h3>Colophon &amp; source register</h3>
+        <div class="colo">
+          <div class="r"><span class="k">Analyst of record</span><span class="v">Barry Hurd · BHIL</span></div>
+          <div class="r"><span class="k">Research window</span><span class="v">Oct 20–21 2026 UTC</span></div>
+          <div class="r"><span class="k">Instruments</span><span class="v">Claude Advanced Research · BHIL Visual Catalog</span></div>
+          <div class="r"><span class="k">Handling</span><span class="v">TLP:CLEAR · public reporting only</span></div>
+        </div>
+        <ul class="srcs">
+          <li><b>NSA</b> — “NSA Advisory: PHP Updates,” Oct 21 2026<span class="gr">A1</span></li>
+          <li><b>CISA</b> — “Critical Vulnerabilities in PHP Require Immediate Patching”<span class="gr">A1</span></li>
+          <li><b>PHP project</b> — GHSA-w8hw-w9fx-j79w · GHSA-6wmf-4rv5-p3rp<span class="gr">A1</span></li>
+          <li><b>CERT-EU</b> — Security Advisory 2026-018<span class="gr">A1</span></li>
+          <li><b>UK NCSC</b> — critical issue affecting PHP<span class="gr">A2</span></li>
+          <li><b>The PHP Foundation</b> — security release &amp; process post<span class="gr">A2</span></li>
+          <li><b>Wiz Research</b> — PHP2Shell technical analysis<span class="gr">B2</span></li>
+          <li><b>Sansec</b> — commerce exposure analysis<span class="gr">B2</span></li>
+          <li><b>Cloudflare</b> — WAF protection &amp; attack telemetry<span class="gr">B2</span></li>
+          <li><b>watchTowr · Hadrian · Patchstack · Huntress</b> — exploitation reporting<span class="gr">B3</span></li>
+          <li><b>Tenable · Qualys · Rapid7</b> — detection notes<span class="gr">B2</span></li>
+          <li><b>BuiltWith Trends</b> — PHP usage statistics<span class="gr">B2</span></li>
+          <li><b>W3Techs</b> — version share, Oct 21 2026<span class="gr">B2</span></li>
+          <li><b>IBM</b> — Cost of a Data Breach 2026<span class="gr">B3</span></li>
+          <li><b>Coveware · Sophos · ITIC</b> — ransom, recovery &amp; downtime benchmarks<span class="gr">B3</span></li>
+          <li><b>UK ICO</b> — British Airways penalty notice, 2020<span class="gr">A1</span></li>
+          <li><b>GreyNoise · Cisco Talos</b> — CVE-2024-4577 precedent<span class="gr">B2</span></li>
+          <li><b>Press</b> — SecurityWeek · BleepingComputer · The Hacker News<span class="gr">B2–C3</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Take this to your board</h3>
+        <p style="color:#A7AEBD;margin:1.2rem 0 0;line-height:1.65;font-size:.95rem">BHIL turns raw signal into decision-grade intelligence — briefs, advisory memos, and blast-radius assessments built by a human analyst directing AI instruments. The companion intelligence brief behind this story (REF PHP2SHELL-001/V1) is available on request.</p>
+        <div class="contact">
+          <div class="cb-name">Barry Hurd</div>
+          <div class="cb-tag">Barry Hurd Intelligence Lab</div>
+          <div class="cb-rows">
+            <div><span>EMAIL</span><a href="mailto:barry@barryhurd.com">barry@barryhurd.com</a></div>
+            <div><span>LINKEDIN</span><a href="https://linkedin.com/in/barryhurd" rel="noopener">linkedin.com/in/barryhurd</a></div>
+            <div><span>WEB</span><a href="https://barryhurd.com" rel="noopener">barryhurd.com</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endfoot">
+      <div class="sig">BHIL — Barry Hurd Intelligence Lab</div>
+      <div>Human-Directed. AI-Enabled. Commercially Tested.</div>
+      <div>Scroll Briefing · REF PHP2SHELL-001 · Oct 21 2026</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  root.classList.remove("no-js"); root.classList.add("js");
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var PAL={paper:"#FCFAF6",ink:"#1B1F2E",inkSoft:"#4C5266",muted:"#6B7186",navy:"#2A3555",
+    cobalt:"#2F5DBF",claret:"#8A2331",claretDeep:"#581622",moss:"#3E7A55",line:"#D6D0C4",panel:"#12161F"};
+  var clamp=function(v,a,b){return v<a?a:v>b?b:v;};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+  var ease=function(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;};
+
+  /* progress bar */
+  var prog=document.getElementById("progress");
+  /* scroll handler registry (rAF-coalesced) */
+  var onScroll=[], ticking=false;
+  function fire(){
+    var y=window.pageYOffset, h=document.documentElement.scrollHeight-window.innerHeight;
+    if(prog)prog.style.width=(h>0?clamp(y/h,0,1)*100:0)+"%";
+    for(var i=0;i<onScroll.length;i++)onScroll[i](y);
+    ticking=false;
+  }
+  function req(){ if(!ticking){ticking=true;requestAnimationFrame(fire);} }
+  window.addEventListener("scroll",req,{passive:true});
+  window.addEventListener("resize",function(){sizeAll();req();},{passive:true});
+  /* progress of an element through the viewport: 0 as it enters, 1 as it leaves */
+  function trackProgress(track){
+    var r=track.getBoundingClientRect();
+    var top=r.top+window.pageYOffset;
+    var dist=track.offsetHeight-window.innerHeight;
+    return dist<=0?0:clamp((window.pageYOffset-top)/dist,0,1);
+  }
+
+  /* reveal — scroll-driven with a shrinking queue so instant jumps (deep links,
+     anchor scrolls, thumbnail capture) never leave content stuck at opacity:0.
+     IntersectionObserver handles the quiet above-fold/layout-shift case. */
+  var revQueue=[].slice.call(document.querySelectorAll(".rv,.rv2"));
+  function flushReveal(){
+    for(var i=revQueue.length-1;i>=0;i--){
+      var el=revQueue[i];
+      if(el.classList.contains("in")){revQueue.splice(i,1);continue;}
+      var r=el.getBoundingClientRect();
+      if(r.top<window.innerHeight*0.92 && r.bottom>0){ el.classList.add("in"); revQueue.splice(i,1); }
+    }
+  }
+  onScroll.push(flushReveal);
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);} });
+    },{threshold:.14,rootMargin:"0px 0px -6% 0px"});
+    revQueue.forEach(function(el){io.observe(el);});
+  } else {
+    revQueue.forEach(function(el){el.classList.add("in");});
+    revQueue.length=0;
+  }
+  window.addEventListener("load",function(){flushReveal();});
+
+  /* HiDPI canvas sizing */
+  var canvases=[];
+  function fitCanvas(cv){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    var r=cv.getBoundingClientRect();
+    cv.width=Math.max(1,Math.round(r.width*dpr));
+    cv.height=Math.max(1,Math.round(r.height*dpr));
+    var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {w:r.width,h:r.height,ctx:ctx};
+  }
+  function sizeAll(){ canvases.forEach(function(c){c.resize();}); }
+
+  /* number counters */
+  function fmt(n,kind){
+    if(kind==="m")return (n/1e6).toFixed(1)+"M";
+    if(kind==="k")return Math.round(n/1000)+"K";
+    if(kind==="comma")return Math.round(n).toLocaleString("en-US");
+    return Math.round(n).toString();
+  }
+  function runCount(el){
+    var target=parseFloat(el.getAttribute("data-count")), kind=el.getAttribute("data-fmt")||"plain";
+    if(reduce){el.textContent=fmt(target,kind);return;}
+    var dur=1500, t0=null;
+    function step(ts){ if(!t0)t0=ts; var p=clamp((ts-t0)/dur,0,1); el.textContent=fmt(target*ease(p),kind); if(p<1)requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+  if("IntersectionObserver" in window){
+    var cio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){runCount(e.target);cio.unobserve(e.target);}});},{threshold:.5});
+    document.querySelectorAll("[data-count]").forEach(function(el){cio.observe(el);});
+  } else { document.querySelectorAll("[data-count]").forEach(runCount); }
+
+  /* ============ HERO — detonation particle field ============ */
+  (function(){
+    var cv=document.getElementById("hero-canvas"); if(!cv)return;
+    var track=document.getElementById("hero-track");
+    var cue=document.getElementById("hero-cue");
+    var hudA=document.getElementById("hud-a"), hudB=document.getElementById("hud-b");
+    var dim=fitCanvas(cv), N=reduce?260:620, pts=[], seed=1234;
+    function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
+    function build(){
+      dim=fitCanvas(cv); pts=[];
+      var cx=dim.w/2, cy=dim.h*0.5, maxR=Math.hypot(dim.w,dim.h)*0.62;
+      for(var i=0;i<N;i++){
+        var a=rnd()*Math.PI*2, rr=Math.pow(rnd(),0.55);
+        pts.push({a:a,rr:rr,R:maxR*rr,
+          sz:0.6+rnd()*1.9, hot:rnd()<0.09, tw:rnd()*6.28,
+          cx:cx,cy:cy});
+      }
+    }
+    build();
+    var P=0;
+    function draw(){
+      var ctx=dim.ctx,w=dim.w,h=dim.h; ctx.clearRect(0,0,w,h);
+      var cx=w/2, cy=h*0.5;
+      var ring=ease(clamp(P*1.25,0,1));           // shockwave expansion
+      var ringR=ring*Math.hypot(w,h)*0.6;
+      var settle=ease(clamp((P-0.15)/0.85,0,1));
+      // faint expanding shock ring
+      if(ring>0.02&&ring<0.999){
+        ctx.beginPath(); ctx.arc(cx,cy,ringR,0,6.2832);
+        ctx.strokeStyle="rgba(138,35,49,"+(0.16*(1-ring))+")"; ctx.lineWidth=1.2; ctx.stroke();
+      }
+      // epicenter mark
+      var coreA=clamp(1-P*2.2,0,1);
+      if(coreA>0){ ctx.beginPath(); ctx.arc(cx,cy,3.4,0,6.2832); ctx.fillStyle="rgba(138,35,49,"+coreA+")"; ctx.fill(); }
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i];
+        var reach=clamp((ring-p.rr)*2.4,0,1);       // when the wave passes this radius it lights
+        var r=p.R*settle;
+        var x=cx+Math.cos(p.a)*r, y=cy+Math.sin(p.a)*r*0.86;
+        var tw=0.6+0.4*Math.sin(P*7+p.tw);
+        var lit=reach;
+        var baseA=lerp(0.05,0.5,lit)*tw;
+        var col=p.hot?("rgba(138,35,49,"+clamp(baseA*1.5,0,.85)+")"):("rgba(42,53,85,"+baseA+")");
+        var sz=p.sz*(0.7+0.5*lit);
+        ctx.beginPath(); ctx.arc(x,y,sz,0,6.2832); ctx.fillStyle=col; ctx.fill();
+      }
+      // vignette-free soft paper fade at edges for legibility behind text
+      var g=ctx.createRadialGradient(cx,cy,h*0.1,cx,cy,h*0.75);
+      g.addColorStop(0,"rgba(252,250,246,0)"); g.addColorStop(1,"rgba(252,250,246,0.55)");
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    }
+    canvases.push({resize:function(){build();draw();}});
+    onScroll.push(function(){
+      P=trackProgress(track); draw();
+      if(cue)cue.style.opacity=P>0.04?"0":"0.9";
+      if(hudA)hudA.classList.toggle("on",P>0.12&&P<0.9);
+      if(hudB)hudB.classList.toggle("on",P>0.42&&P<0.95);
+    });
+    draw();
+    if(reduce){P=1;draw();}
+  })();
+
+  /* ============ MEMORY CHAMBER — pinned heap-grid corruption ============ */
+  (function(){
+    var cv=document.getElementById("mem-canvas"); if(!cv)return;
+    var track=document.getElementById("mem-track");
+    var phaseEl=document.getElementById("mem-phase");
+    var steps=[].slice.call(document.querySelectorAll("#mem-caption .mem-step"));
+    var dim=fitCanvas(cv);
+    var cols=0,rows=0,cells=[],seed=99;
+    function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
+    function build(){
+      dim=fitCanvas(cv);
+      var target=dim.w<560?15:26;
+      cols=target; var cw=dim.w/cols; rows=Math.ceil((dim.h-150)/cw);
+      cells=[];
+      for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
+        cells.push({c:c,r:r,kind:rnd(),jitter:rnd(),free:rnd()<0.5,leak:rnd()});
+      }
+    }
+    build();
+    var phaseNames=["PHASE 0 · WORKER IDLE","PHASE 1 · REQUEST PARSING","PHASE 2 · OOM ABORT","PHASE 3 · HEAP CORRUPTION","PHASE 4 · EXFIL / RCE","PHASE 5 · FULL COMPROMISE"];
+    function colorFor(cell,stage,local){
+      // stage 0-5 continuous
+      if(stage<1){ // ordered heap — calm navy/cobalt blocks
+        return cell.kind<0.3?"rgba(47,93,191,0.33)":cell.kind<0.62?"rgba(42,53,85,0.42)":"rgba(62,122,85,0.30)";
+      }
+      if(stage<2){ // parsing — a band of activity sweeps in
+        var act=clamp((local- cell.c/cols)*3,0,1);
+        return cell.kind<0.5?"rgba(47,93,191,"+(0.30+0.35*act)+")":"rgba(42,53,85,"+(0.40+0.2*act)+")";
+      }
+      if(stage<3){ // abort — half-init cells flicker to claret
+        var hit=cell.jitter<local*1.1;
+        return hit?"rgba(138,35,49,"+(0.4+0.4*cell.leak)+")":"rgba(42,53,85,0.34)";
+      }
+      if(stage<4){ // corruption — freed memory, claret spreads, some deep
+        var spread=clamp(local*1.2,0,1);
+        if(cell.free&&cell.jitter<spread)return "rgba(88,22,34,"+(0.55+0.4*cell.leak)+")";
+        if(cell.jitter<spread*1.3)return "rgba(138,35,49,"+(0.45+0.4*cell.leak)+")";
+        return "rgba(42,53,85,0.3)";
+      }
+      if(stage<5){ // exfil — some cells brighten (leaked secrets) streaming up
+        if(cell.leak>0.78)return "rgba(108,192,232,"+(0.5+0.4*Math.sin(local*9+cell.jitter*6))+")";
+        return cell.free?"rgba(88,22,34,0.7)":"rgba(138,35,49,0.55)";
+      }
+      // full compromise
+      return cell.leak>0.82?"rgba(232,180,188,0.85)":cell.free?"rgba(88,22,34,0.82)":"rgba(138,35,49,0.7)";
+    }
+    function draw(stageF){
+      var ctx=dim.ctx,w=dim.w,h=dim.h; ctx.clearRect(0,0,w,h);
+      ctx.fillStyle=PAL.panel; ctx.fillRect(0,0,w,h);
+      var cw=w/cols, pad=cw*0.14, top=70;
+      var stage=Math.floor(stageF), local=stageF-stage;
+      for(var i=0;i<cells.length;i++){
+        var cell=cells[i];
+        var x=cell.c*cw+pad, y=top+cell.r*cw+pad, s=cw-pad*2;
+        var yoff=0;
+        if(stageF>=4){ // leaked cells drift upward
+          if(cell.leak>0.78) yoff=-(local+(stage-4))*cw*2.2*((cell.jitter)+0.3);
+        }
+        ctx.fillStyle=colorFor(cell,stageF,local);
+        ctx.fillRect(x,y+yoff,s,s);
+      }
+      // scan line during parse/abort
+      if(stageF>=1&&stageF<3){
+        var sx=((stageF-1)/2)*w;
+        ctx.fillStyle="rgba(232,180,188,0.5)"; ctx.fillRect(sx,top,1.5,h-top);
+      }
+    }
+    function setStage(f){
+      var idx=clamp(Math.round(f),0,5);
+      if(phaseEl)phaseEl.textContent=phaseNames[idx];
+      steps.forEach(function(s){ s.classList.toggle("on", parseInt(s.getAttribute("data-step"),10)===idx); });
+      draw(f);
+    }
+    canvases.push({resize:function(){build();draw(curr);}});
+    var curr=0;
+    onScroll.push(function(){
+      var p=trackProgress(track);
+      curr=p*5; // 0..5
+      setStage(curr);
+    });
+    setStage(0);
+    if(reduce){ // show the final, most informative state at rest-ish midpoint
+      setStage(0);
+    }
+  })();
+
+  /* ============ RACE — pinned 36h disclosure timeline (SVG scrub) ============ */
+  (function(){
+    var svg=document.getElementById("race-svg"); if(!svg)return;
+    var track=document.getElementById("race-track");
+    var clock=document.getElementById("race-clock");
+    var noteEl=document.getElementById("race-note");
+    var NS="http://www.w3.org/2000/svg";
+    var W=1000,H=430, x0=70,x1=940, H0=0,H1=36; // hours from Oct20 12:00
+    var X=function(t){return x0+(t/H1)*(x1-x0);};
+    var lanes=[
+      {name:"DISCLOSURE & VENDORS",y:120},
+      {name:"DEFENDERS",y:235},
+      {name:"ATTACKERS — OBSERVED",y:350}
+    ];
+    var release=26; // 14:00 Oct21
+    var events=[
+      {lane:0,t:3,lab:"CVE IDs leak",key:true,side:-1,note:"October 20, ~15:00 UTC — the identifiers escape ahead of any patch."},
+      {lane:0,t:19.75,lab:"Chainguard ships fixed images early",side:-1,note:"Pre-release hardened images let attackers diff the fix hours before release."},
+      {lane:0,t:24.4,lab:"Calif exploit video posted in error",side:1,note:"A researcher's proof-of-concept demo goes public by mistake."},
+      {lane:0,t:26,lab:"PHP fixes + NSA & CISA advisories",key:true,side:-1,note:"The coordinated release: four fixed builds, five-sentence NSA advisory, CISA alert."},
+      {lane:1,t:11,lab:"InMotion disables upload-progress fleet-wide",side:-1,note:"One host hardens its whole fleet overnight; others have no release-day packages."},
+      {lane:1,t:15.03,lab:"Cloudflare WAF rules live · 03:02",key:true,side:1,note:"Edge protection goes up — eleven hours before the official release."},
+      {lane:1,t:27.5,lab:"Dutch orgs take sites offline",side:-1,note:"House of Representatives, NCSC-NL, Tweakers pull sites as a precaution."},
+      {lane:1,t:31.5,lab:"CISA: no confirmed exploitation · KEV unlisted",side:1,note:"No federal confirmation, and no binding remediation deadline yet."},
+      {lane:2,t:19.72,lab:"Attack traffic observed — Cloudflare · 07:43",key:true,side:-1,note:"Six hours BEFORE release. The strongest early exploitation signal."},
+      {lane:2,t:23.58,lab:"“At scale” — Hadrian",side:1,note:"Vendor telemetry claims scale, mostly via the session upload-progress path."},
+      {lane:2,t:26.32,lab:"Exploitation attempts — watchTowr",side:1,note:"Active attempts against both CVEs minutes after release."},
+      {lane:2,t:30.5,lab:"Public write-ups + exploit tool circulating",side:-1,note:"The n-day is fully public; opportunistic mass scanning expected."}
+    ];
+    function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+    function build(){
+      while(svg.firstChild)svg.removeChild(svg.firstChild);
+      // hour grid
+      var ticks=[[0,"OCT 20"],[6,"18:00"],[12,"OCT 21"],[18,"06:00"],[24,"12:00"],[30,"18:00"],[36,"OCT 22"]];
+      ticks.forEach(function(t){
+        svg.appendChild(el("line",{x1:X(t[0]),y1:84,x2:X(t[0]),y2:H-32,stroke:PAL.line,"stroke-width":0.8}));
+        var tx=el("text",{x:X(t[0]),y:H-14,"text-anchor":"middle","font-family":"'JetBrains Mono',monospace","font-size":11,fill:PAL.muted,"letter-spacing":"0.08em"});
+        tx.textContent=t[1]; svg.appendChild(tx);
+      });
+      // release rule
+      var rl=el("line",{x1:X(release),y1:72,x2:X(release),y2:H-32,stroke:PAL.claret,"stroke-width":1.6,id:"rel-rule"});
+      svg.appendChild(rl);
+      var rt=el("text",{x:X(release)+6,y:80,"font-family":"'JetBrains Mono',monospace","font-size":10.5,fill:PAL.claret,"letter-spacing":"0.14em"});
+      rt.textContent="COORDINATED RELEASE · 14:00"; svg.appendChild(rt);
+      // lanes
+      lanes.forEach(function(ln){
+        svg.appendChild(el("line",{x1:x0,y1:ln.y,x2:x1,y2:ln.y,stroke:"#B9B2A4","stroke-width":1}));
+        var lt=el("text",{x:x0,y:ln.y-30,"font-family":"'JetBrains Mono',monospace","font-size":11,fill:PAL.muted,"letter-spacing":"0.14em"});
+        lt.textContent=ln.name; svg.appendChild(lt);
+      });
+      // events
+      events.forEach(function(ev,i){
+        var ly=lanes[ev.lane].y, x=X(ev.t);
+        var g=el("g",{opacity:0,id:"ev"+i}); ev._g=g;
+        var tie=el("line",{x1:x,y1:ly+(ev.side<0?-7:7),x2:x,y2:ly+(ev.side<0?-10:10),stroke:"#B9B2A4","stroke-width":0.8});
+        g.appendChild(tie);
+        if(ev.key){
+          g.appendChild(el("path",{d:"M "+x+" "+(ly-6)+" L "+(x+6)+" "+ly+" L "+x+" "+(ly+6)+" L "+(x-6)+" "+ly+" Z",fill:PAL.claret}));
+        } else {
+          g.appendChild(el("circle",{cx:x,cy:ly,r:4,fill:PAL.cobalt}));
+        }
+        var anchor=x<140?"start":x>880?"end":"middle";
+        var ty=ev.side<0?ly-16:ly+24;
+        var tt=el("text",{x:x,y:ty,"text-anchor":anchor,"font-family":"Inter,sans-serif","font-size":12.5,"font-weight":500,fill:PAL.ink});
+        tt.textContent=ev.lab; g.appendChild(tt);
+        svg.appendChild(g);
+      });
+    }
+    build();
+    function update(p){
+      var hNow=p*H1;
+      // clock label
+      var totalMin=Math.round(hNow*60), base=new Date(Date.UTC(2026,9,20,12,0));
+      var d=new Date(base.getTime()+totalMin*60000);
+      var dayLabel=(d.getUTCMonth()===9?"OCT ":"NOV ")+d.getUTCDate();
+      var hh=("0"+d.getUTCHours()).slice(-2), mm=("0"+d.getUTCMinutes()).slice(-2);
+      if(clock)clock.innerHTML=dayLabel+" · "+hh+":"+mm+'<span class="d"> UTC</span>';
+      var active=null;
+      events.forEach(function(ev){
+        var on=hNow>=ev.t-0.001;
+        ev._g.setAttribute("opacity",on?1:0.08);
+        if(on&&(!active||ev.t>active.t))active=ev;
+      });
+      if(noteEl){
+        if(active&&active.note){ noteEl.textContent=active.note; noteEl.classList.add("on"); }
+        else noteEl.classList.remove("on");
+      }
+    }
+    canvases.push({resize:function(){build();update(lastP);}});
+    var lastP=0;
+    onScroll.push(function(){ lastP=trackProgress(track); update(lastP); });
+    update(0);
+    if(reduce){ update(1); }
+  })();
+
+  /* ============ TIER DOT PLOT (SVG, log scale) ============ */
+  (function(){
+    var svg=document.getElementById("tier-svg"); if(!svg)return;
+    var NS="http://www.w3.org/2000/svg";
+    var W=1000, x0=250,x1=940;
+    var lg=function(v){return x0+((Math.log10(v)-2)/6)*(x1-x0);};
+    function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+    var groups=[
+      {g:"TRAFFIC / REACH",rows:[["Top 10k sites",1362,true],["Top 100k sites",13440,false]]},
+      {g:"SALES REVENUE",rows:[["$100M+ revenue",1155,true],["$10M+ revenue",3120,false]]},
+      {g:"E-COMMERCE SCALE",rows:[["100K+ SKUs",102,true],["10K+ SKUs",3949,false]]},
+      {g:"LONG TAIL",rows:[["Outside top 1M",23600000,false]]}
+    ];
+    var decades=[[2,"100"],[3,"1K"],[4,"10K"],[5,"100K"],[6,"1M"],[7,"10M"],[8,"100M"]];
+    decades.forEach(function(d){
+      var x=x0+((d[0]-2)/6)*(x1-x0);
+      svg.appendChild(el("line",{x1:x,y1:60,x2:x,y2:500,stroke:PAL.line,"stroke-width":0.7}));
+      var t=el("text",{x:x,y:520,"text-anchor":"middle","font-family":"'JetBrains Mono',monospace","font-size":12,fill:PAL.muted});
+      t.textContent=d[1]; svg.appendChild(t);
+    });
+    var lr=el("text",{x:x1,y:44,"text-anchor":"end","font-family":"'JetBrains Mono',monospace","font-size":11,fill:PAL.muted,"letter-spacing":"0.12em"});
+    lr.textContent="LIVE SITES · LOG SCALE"; svg.appendChild(lr);
+    var y=80, dots=[];
+    groups.forEach(function(grp){
+      var gl=el("text",{x:20,y:y+4,"font-family":"'JetBrains Mono',monospace","font-size":11.5,fill:PAL.muted,"letter-spacing":"0.14em"});
+      gl.textContent=grp.g; svg.appendChild(gl); y+=26;
+      grp.rows.forEach(function(row){
+        var cy=y+8, dx=lg(row[1]);
+        var lab=el("text",{x:20,y:cy+4,"font-family":"Inter,sans-serif","font-size":15,"font-weight":500,fill:PAL.ink});
+        lab.textContent=row[0]; svg.appendChild(lab);
+        var conn=el("line",{x1:x0,y1:cy,x2:x0,y2:cy,stroke:PAL.line,"stroke-width":1}); svg.appendChild(conn);
+        var c=el("circle",{cx:x0,cy:cy,r:0,fill:row[2]?PAL.claret:PAL.navy}); svg.appendChild(c);
+        var val=el("text",{x:x0,y:cy+5,"font-family":"'JetBrains Mono',monospace","font-size":14,"font-weight":500,fill:row[2]?PAL.claret:PAL.ink,opacity:0});
+        val.textContent=row[1]>=1e6?"~23.6M":row[1].toLocaleString("en-US");
+        svg.appendChild(val);
+        dots.push({c:c,conn:conn,val:val,dx:dx,hot:row[2]});
+        y+=40;
+      });
+      y+=10;
+    });
+    // annotations
+    var a1=el("text",{x:430,y:150,"font-family":"'Source Serif 4',Georgia,serif","font-style":"italic","font-size":15,fill:PAL.claret,opacity:0,id:"tier-an1"});
+    a1.textContent="prime targets — ransomware, skimming, watering-hole"; svg.appendChild(a1);
+    var a2=el("text",{x:930,y:430,"text-anchor":"end","font-family":"'Source Serif 4',Georgia,serif","font-style":"italic","font-size":15,fill:PAL.inkSoft,opacity:0,id:"tier-an2"});
+    a2.textContent="96.6% of all live sites — botnet & DDoS raw material"; svg.appendChild(a2);
+    var played=false;
+    function play(){
+      if(played||reduce){ dots.forEach(function(dd){dd.c.setAttribute("cx",dd.dx);dd.c.setAttribute("r",5);dd.conn.setAttribute("x2",dd.dx-7);dd.val.setAttribute("x",dd.dx+10);dd.val.setAttribute("opacity",1);}); a1.setAttribute("opacity",1);a2.setAttribute("opacity",1); played=true; return; }
+      played=true; var t0=null, dur=1400;
+      function step(ts){ if(!t0)t0=ts; var p=ease(clamp((ts-t0)/dur,0,1));
+        dots.forEach(function(dd){ var cx=lerp(x0,dd.dx,p); dd.c.setAttribute("cx",cx); dd.c.setAttribute("r",5*clamp(p*2,0,1)); dd.conn.setAttribute("x2",Math.max(x0,cx-7)); dd.val.setAttribute("x",cx+10); dd.val.setAttribute("opacity",p); });
+        if(p<1)requestAnimationFrame(step); else {a1.setAttribute("opacity",1);a2.setAttribute("opacity",1);}
+      }
+      requestAnimationFrame(step);
+    }
+    if("IntersectionObserver" in window){ var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){play();o.disconnect();}});},{threshold:.3}); o.observe(svg); }
+    else play();
+  })();
+
+  /* ============ EXPOSURE MATRIX (data-driven rows) ============ */
+  (function(){
+    var body=document.getElementById("mx-body"); if(!body)return;
+    var rows=[
+      ["Traffic / Reach","Top 10k","1,362","High-profile defacement, massive malware distribution (watering-hole attacks).",false],
+      ["","Top 100k","13,440","Significant brand damage, high-value data exfiltration.",false],
+      ["Sales Revenue","$100m+","1,155","Prime targets for targeted ransomware, corporate espionage, massive financial extortion.",true],
+      ["","$10m+","3,120","Highly lucrative targets for financial data theft and ransomware.",false],
+      ["E-Commerce (SKUs)","100k+ SKUs","102","Enterprise e-commerce; extreme risk of Magecart card skimming and customer-data breaches.",true],
+      ["","10k+ SKUs","3,949","Large retail operations; high risk of business disruption and inventory manipulation.",false],
+      ["Long-Tail / Zombie","Outside Top 1m","~23.6M","Massive botnets, DDoS staging, crypto-mining — often unmaintained “abandonware.”",false]
+    ];
+    rows.forEach(function(r){
+      var tr=document.createElement("tr"); if(r[4])tr.className="hot";
+      tr.innerHTML='<td class="cat">'+r[0]+'</td><td class="tier">'+r[1]+'</td><td class="vol">'+r[2]+'</td><td class="risk">'+r[3]+'</td>';
+      body.appendChild(tr);
+    });
+  })();
+
+  /* ============ WAFFLE (reveal) ============ */
+  (function(){
+    var wf=document.getElementById("waffle"); if(!wf)return;
+    var seq=[]; for(var i=0;i<65;i++)seq.push("v8"); for(i=0;i<27;i++)seq.push("v7"); for(i=0;i<8;i++)seq.push("v5");
+    seq.forEach(function(cls,i){ var s=document.createElement("div"); s.className="sq "+cls; s.style.transitionDelay=(reduce?0:(i*7))+"ms"; wf.appendChild(s); });
+    if("IntersectionObserver" in window){ var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){wf.classList.add("go");o.disconnect();}});},{threshold:.25}); o.observe(wf); }
+    else wf.classList.add("go");
+  })();
+
+  /* ============ VERSION BRANCH CARDS ============ */
+  (function(){
+    var grid=document.getElementById("vgrid"); if(!grid)return;
+    var cards=[
+      ["8.5","Active support","8.5.12","Upgrade now.","fixed"],
+      ["8.4","Active support","8.4.27","Upgrade now.","fixed"],
+      ["8.3","Security-only","8.3.36","Upgrade now.","fixed"],
+      ["8.2","Security-only · EOL Dec 31 2026","8.2.35","Upgrade now; plan the exit.","fixed"],
+      ["8.1 · 8.0 · 7.4","End of life","Backport only","Rebuild or take an LTS build; migrate.","dead"],
+      ["7.3 & older · 5.x","End of life","None — ever","Isolate or take offline; migrate.","dead"]
+    ];
+    cards.forEach(function(c){
+      var d=document.createElement("div"); d.className="vcard "+c[4];
+      d.innerHTML='<div class="b"><span class="br">'+c[0]+'</span><span class="fx">'+c[2]+'</span></div><div class="st">'+c[1]+'</div><div class="od">'+c[3]+'</div>';
+      grid.appendChild(d);
+    });
+  })();
+
+  /* ============ ECONOMIC BARS (animate on view) ============ */
+  (function(){
+    var wrap=document.getElementById("econ"); if(!wrap)return;
+    var vmax=1.5;
+    var bars=[
+      ["24 hours offline — full tier","NSA fallback order · revenue floor",0.32,false],
+      ["5% of tier breached — 58 sites","IBM U.S. average $11.5M per breach",0.66,false],
+      ["10% of tier breached — 116 sites","Same basis — a plausible bad week",1.33,true]
+    ];
+    bars.forEach(function(b){
+      var row=document.createElement("div"); row.className="eb"+(b[3]?" hot":"");
+      row.innerHTML='<div class="top"><div><div class="lab">'+b[0]+'</div><div class="sub">'+b[1]+'</div></div><div class="val mono-num">$'+b[2].toFixed(2)+'B</div></div><div class="rail"><div class="fill" data-w="'+(b[2]/vmax*100)+'"></div></div>';
+      wrap.appendChild(row);
+    });
+    var fills=wrap.querySelectorAll(".fill");
+    function go(){ fills.forEach(function(f){ f.style.width=f.getAttribute("data-w")+"%"; }); }
+    if(reduce){ go(); return; }
+    if("IntersectionObserver" in window){ var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){go();o.disconnect();}});},{threshold:.3}); o.observe(wrap); }
+    else go();
+  })();
+
+  /* ============ ACTION REGISTER ============ */
+  (function(){
+    var reg=document.getElementById("reg"); if(!reg)return;
+    var rows=[
+      ["P0","Upgrade internet-facing PHP to a fixed build; restart every worker.","Platform engineering","H+0–24"],
+      ["P0","Isolate or take offline every system that cannot patch — NSA directive.","Network operations","H+4–14"],
+      ["P1","WAF rules, multipart blocking, php.ini stopgaps on everything awaiting patch.","Security operations","H+0–16"],
+      ["P1","Written patch attestations from every host, agency, and vendor shipping PHP.","Third-party risk","H+4–24"],
+      ["P2","Assume-breach hunt and full secret rotation for hosts exposed after Oct 20.","IR / SOC","H+24–72"],
+      ["P2","Legacy migration program with recorded risk acceptances for every stay-behind.","CISO + board","Q4 2026"],
+      ["P3","Fund upstream PHP security capacity — the Foundation calls the stall a structural failure.","CISO","FY 2027"]
+    ];
+    rows.forEach(function(r){
+      var pr=r[0].toLowerCase();
+      var row=document.createElement("div"); row.className="row";
+      row.innerHTML='<span class="p '+pr+'">'+r[0]+'</span><span class="a">'+r[1]+'<span class="own">'+r[2]+'</span></span><span class="t">'+r[3]+'</span>';
+      reg.appendChild(row);
+    });
+  })();
+
+  fire();
+})();
+</script>
+
+</head>
+<body></body>
+</html>

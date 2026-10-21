@@ -1,0 +1,8 @@
+host,php_version,sapi,internet_facing,notes
+www1.example.com,8.3.20,fpm,yes,primary storefront
+www2.example.com,8.4.27,fpm,yes,patched 2026-10-21
+checkout.example.com,8.2.30,fpm,yes,payment path — Tier 1
+legacy-crm.internal,7.4.33,mod_php,no,business-critical legacy app
+blog.example.com,8.1.29,fpm,yes,marketing microsite
+archive.example.com,5.6.40,cgi,yes,candidate for decommission
+staging.example.com,8.3.36,fpm,no,staging — patched
