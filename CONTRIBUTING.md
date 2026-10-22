@@ -22,7 +22,7 @@ assessing and remediating systems the operator controls.
 
 ## Ground rules for the tools
 
-- Standard library only (Python 3.8+) — no third-party dependencies.
+- Standard library only (Python 3.8+) - no third-party dependencies.
 - No network calls and no state changes in the core tools.
 - Keep [`data/affected_versions.json`](data/affected_versions.json) the single source of truth;
   don't hard-code version numbers in the scripts.
@@ -30,8 +30,8 @@ assessing and remediating systems the operator controls.
 ## Verifying a change
 
 ```bash
-python3 tools/php_patch_check.py 8.3.20      # expect: VULNERABLE — PATCH NOW, exit 1
+python3 tools/php_patch_check.py 8.3.20      # expect: VULNERABLE - PATCH NOW, exit 1
 python3 tools/php_patch_check.py 8.4.27      # expect: SAFE, exit 0
-python3 tools/php_patch_check.py 5.6.40      # expect: VULNERABLE — ABANDONED, exit 2
+python3 tools/php_patch_check.py 5.6.40      # expect: VULNERABLE - ABANDONED, exit 2
 python3 tools/php_patch_check.py --inventory data/inventory.example.csv
 ```

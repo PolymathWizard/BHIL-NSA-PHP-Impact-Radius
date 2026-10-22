@@ -26,7 +26,7 @@ and progressively route traffic away from the legacy core. Decommission what's l
 
 ### 5. Make it a governance decision
 Every legacy system that stays online unpatched needs a **recorded risk acceptance**: owner,
-compensating controls, review date — with the economic arithmetic from
+compensating controls, review date - with the economic arithmetic from
 [03-economic-impact.md](03-economic-impact.md) beside it. The case almost always favors funded
 migration over carrying an unauthenticated pre-auth RCE.
 

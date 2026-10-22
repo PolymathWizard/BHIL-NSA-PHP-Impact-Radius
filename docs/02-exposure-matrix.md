@@ -1,5 +1,7 @@
 # 02 · Quantifying the Threat Landscape
 
+<img src="../assets/exhibits/04-exposure-paradox.png" alt="The Exposure Paradox" width="100%">
+
 > BuiltWith's census turns a technical advisory into a map of who is standing in the open.
 
 ## The blast radius
@@ -11,13 +13,13 @@ verified patched.
 
 ## Four risk profiles
 
-- **High-visibility properties** — top-ranked media, SaaS, government and enterprise sites,
+- **High-visibility properties** - top-ranked media, SaaS, government and enterprise sites,
   often fingerprinted on subdomains or inner pages. Reach and a perimeter foothold.
-- **Revenue-bearing enterprises** — PHP sitting beside payment flows and internal networks.
+- **Revenue-bearing enterprises** - PHP sitting beside payment flows and internal networks.
   The ransomware and extortion target set.
-- **Transactional commerce** — Magento/Adobe Commerce, WooCommerce, Shopware are all PHP.
+- **Transactional commerce** - Magento/Adobe Commerce, WooCommerce, Shopware are all PHP.
   Sansec: these stores "are exposed even when their own code is clean."
-- **The long tail** — millions of agency-built, hobbyist and abandoned sites whose patching
+- **The long tail** - millions of agency-built, hobbyist and abandoned sites whose patching
   depends entirely on the hosting provider.
 
 ## The Exposure Matrix
@@ -32,7 +34,7 @@ Machine-readable in [`../data/exposure_matrix.csv`](../data/exposure_matrix.csv)
 | | $10m+ | 3,120 | Highly lucrative targets for financial data theft and ransomware. |
 | **E-Commerce (SKUs)** | 100k+ SKUs | 102 | Enterprise e-commerce; extreme risk of Magecart card skimming and customer-data breaches. |
 | | 10k+ SKUs | 3,949 | Large retail operations; high risk of business disruption and inventory manipulation. |
-| **Long-Tail / Zombie** | Outside Top 1m | ~23.6 Million | Massive botnets, DDoS staging, crypto-mining — often unmaintained "abandonware." |
+| **Long-Tail / Zombie** | Outside Top 1m | ~23.6 Million | Massive botnets, DDoS staging, crypto-mining - often unmaintained "abandonware." |
 
 ## Reading the matrix
 
@@ -43,13 +45,13 @@ Machine-readable in [`../data/exposure_matrix.csv`](../data/exposure_matrix.csv)
 - **The top-tier count is a floor.** BuiltWith fingerprints the primary property; W3Techs
   finds PHP on 59.7% of top-10k sites with a known server-side language. True top-site exposure
   likely runs several times the 1,362 shown.
-- **Tiers overlap** — views of one population, never additive. Never sum them.
+- **Tiers overlap** - views of one population, never additive. Never sum them.
 
 ## The unpatchable third
 
 W3Techs' version census: **65.2%** of PHP sites on PHP 8, **27.0%** on PHP 7, **7.8%** on PHP
-5/4. Applied to the live count, roughly **8.5 million sites** — about 3.2M of them U.S.-hosted
-— run versions with **no upstream fix**. Host telemetry agrees: Mallory counted 883,717
+5/4. Applied to the live count, roughly **8.5 million sites** - about 3.2M of them U.S.-hosted
+ - run versions with **no upstream fix**. Host telemetry agrees: Mallory counted 883,717
 internet-facing hosts (59% of those disclosing a version) still advertising PHP ≤ 8.1 on
 Oct 20.
 

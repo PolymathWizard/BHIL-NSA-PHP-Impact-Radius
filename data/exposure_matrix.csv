@@ -5,4 +5,4 @@ Sales Revenue,$100m+,1155,true,"Prime targets for targeted ransomware, corporate
 Sales Revenue,$10m+,3120,false,"Highly lucrative targets for financial data theft and ransomware."
 E-Commerce (SKUs),100k+ SKUs,102,true,"Enterprise e-commerce; extreme risk of Magecart card skimming and customer-data breaches."
 E-Commerce (SKUs),10k+ SKUs,3949,false,"Large retail operations; high risk of business disruption and inventory manipulation."
-Long-Tail / Zombie,Outside Top 1m,23600000,false,"Massive botnets, DDoS staging grounds, crypto-mining — often unmaintained abandonware."
+Long-Tail / Zombie,Outside Top 1m,23600000,false,"Massive botnets, DDoS staging grounds, crypto-mining - often unmaintained abandonware."

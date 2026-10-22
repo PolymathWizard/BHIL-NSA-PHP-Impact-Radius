@@ -1,3 +1,15 @@
+BHIL dual license
+=================
+
+Code and schemas (everything under tools/, scripts/, data/, and the site/
+source) are licensed under the MIT License, below.
+
+Written content and visual exhibits (everything under docs/, brief/, and
+assets/, and the prose of README.md) are licensed under Creative Commons
+Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+Reuse with attribution to "Barry Hurd Intelligence Lab".
+
+
 MIT License
 
 Copyright (c) 2026 Barry Hurd / Barry Hurd Intelligence Lab

@@ -9,16 +9,16 @@
     { "source": "The PHP Foundation", "title": "Today's PHP security release and how we're strengthening PHP security", "url": "https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/", "grade": "A2" }
   ],
   "vendor_technical_analysis": [
-    { "source": "Wiz Research", "title": "PHP2Shell — PHP RCE", "url": "https://www.wiz.io/blog/php2shell-php-rce", "grade": "B2" },
+    { "source": "Wiz Research", "title": "PHP2Shell - PHP RCE", "url": "https://www.wiz.io/blog/php2shell-php-rce", "grade": "B2" },
     { "source": "Sansec", "title": "PHP2Shell commerce exposure analysis", "url": "https://sansec.io/research/php2shell", "grade": "B2" },
-    { "source": "Cloudflare", "title": "PHP vulnerabilities — WAF protection", "url": "https://blog.cloudflare.com/php-vulnerabilities-waf-protection/", "grade": "B2" },
+    { "source": "Cloudflare", "title": "PHP vulnerabilities - WAF protection", "url": "https://blog.cloudflare.com/php-vulnerabilities-waf-protection/", "grade": "B2" },
     { "source": "Tenable", "title": "PHP2Shell FAQ (CVE-2026-109618 / 109619)", "url": "https://www.tenable.com/blog/php2shell-cve-2026-109618-cve-2026-109619-frequently-asked-questions-about-critical-php-remote", "grade": "B2" },
     { "source": "Rapid7", "title": "ETR: critical unauthenticated RCE in PHP", "url": "https://www.rapid7.com/blog/post/etr-cve-2026-109618-and-cve-2026-109619-critical-unauthenticated-remote-code-execution-in-php/", "grade": "B2" },
     { "source": "Qualys", "title": "PHP announces critical security release for two vulnerabilities", "url": "https://blog.qualys.com/vulnerabilities-threat-research/2026/10/20/php-announces-critical-security-release-for-two-vulnerabilities", "grade": "B2" },
     { "source": "watchTowr / Hadrian / Patchstack / Huntress", "title": "Exploitation telemetry reporting", "url": "https://patchstack.com/articles/php-major-vulnerability-alert-10-2026/", "grade": "B3" }
   ],
   "exploitation_telemetry": [
-    { "source": "CISA KEV Catalog", "title": "Known Exploited Vulnerabilities — check for CVE-2026-109618 / 109619", "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", "grade": "A1" },
+    { "source": "CISA KEV Catalog", "title": "Known Exploited Vulnerabilities - check for CVE-2026-109618 / 109619", "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", "grade": "A1" },
     { "source": "GreyNoise", "title": "Live scanning/exploitation telemetry by CVE", "url": "https://viz.greynoise.io/", "grade": "B2" },
     { "source": "Shadowserver", "title": "Vulnerable-population scanning dashboards", "url": "https://dashboard.shadowserver.org/", "grade": "B2" },
     { "source": "SANS Internet Storm Center", "title": "Daily handler diaries and exploit-activity notes", "url": "https://isc.sans.edu/", "grade": "B2" }
@@ -37,11 +37,11 @@
     { "source": "BleepingComputer", "section": "Security", "url": "https://www.bleepingcomputer.com/news/security/", "grade": "B2" },
     { "source": "The Hacker News", "url": "https://thehackernews.com/", "grade": "B2" },
     { "source": "SecurityWeek", "url": "https://www.securityweek.com/", "grade": "B2" },
-    { "source": "Ars Technica — Security", "url": "https://arstechnica.com/security/", "grade": "B2" },
+    { "source": "Ars Technica - Security", "url": "https://arstechnica.com/security/", "grade": "B2" },
     { "source": "Dark Reading", "url": "https://www.darkreading.com/", "grade": "B2" },
     { "source": "The Record (Recorded Future News)", "url": "https://therecord.media/", "grade": "B2" },
     { "source": "Risky Business", "url": "https://risky.biz/", "grade": "B2" },
     { "source": "Help Net Security", "url": "https://www.helpnetsecurity.com/", "grade": "B2" },
-    { "source": "The Register — Security", "url": "https://www.theregister.com/security/", "grade": "B2" }
+    { "source": "The Register - Security", "url": "https://www.theregister.com/security/", "grade": "B2" }
   ]
 }

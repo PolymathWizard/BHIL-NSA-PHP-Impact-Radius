@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check_local.sh — read-only PHP2Shell posture check for a host you run.
+# check_local.sh - read-only PHP2Shell posture check for a host you run.
 #
 # Reports: PHP version + SAPI, whether this host is on a fixed build, and the
 # state of the four stopgap php.ini settings. It changes NOTHING and contacts
@@ -20,7 +20,7 @@ head() { printf '\n%s== %s ==%s\n' "$bold" "$1" "$rst"; }
 if ! command -v php >/dev/null 2>&1; then
   say "${red}php not found on PATH.${rst} Run this on a host that has the PHP CLI, or pass a version"
   say "string to php_patch_check.py directly. Note: the CLI version may differ from the FPM/web"
-  say "version — always verify the web SAPI from an actual web request, not just the CLI."
+  say "version - always verify the web SAPI from an actual web request, not just the CLI."
   exit 3
 fi
 
@@ -39,7 +39,7 @@ if command -v python3 >/dev/null 2>&1 && [ -f "$here/php_patch_check.py" ]; then
   python3 "$here/php_patch_check.py" "$ver" 2>/dev/null | sed 's/^/  /'
 fi
 
-head "Stopgap php.ini posture (advisory only — patching is the fix)"
+head "Stopgap php.ini posture (advisory only - patching is the fix)"
 get() { php -r "echo ini_get('$1');" 2>/dev/null; }
 
 check() {

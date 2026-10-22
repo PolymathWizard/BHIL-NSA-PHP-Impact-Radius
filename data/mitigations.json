@@ -1,5 +1,5 @@
 {
-  "note": "Stopgap mitigations and detection signals for PHP2Shell. Mitigations buy hours, not weeks — the PHP project states they 'do not make an installation safe.' The only fix is upgrading to a fixed build (see affected_versions.json) and restarting every worker.",
+  "note": "Stopgap mitigations and detection signals for PHP2Shell. Mitigations buy hours, not weeks - the PHP project states they 'do not make an installation safe.' The only fix is upgrading to a fixed build (see affected_versions.json) and restarting every worker.",
   "php_ini": [
     { "setting": "session.upload_progress.enabled", "value": "0", "scope": "php.ini / FPM pool", "effect": "Closes the confirmed CVE-2026-109619 session upload-progress path.", "breaks": "Upload-progress UIs that poll session state." },
     { "setting": "memory_limit", "value": "-1", "scope": "php_admin_value (pool), paired with container/cgroup caps", "effect": "Removes the controllable OOM trigger for CVE-2026-109618.", "breaks": "Exposes the host to memory exhaustion unless a cgroup/container cap is in place. Never pair with RLIMIT_AS / RLIMIT_DATA." },
@@ -9,7 +9,7 @@
   "apply_notes": "Set at php.ini or FPM-pool level (php_admin_value), NOT via ini_set() or .user.ini, then restart every worker. A patched binary on disk does not protect a running mod_php or FPM process.",
   "edge": [
     { "control": "WAF / edge ruleset", "detail": "Enable vendor PHP2Shell rules (Cloudflare live from 03:02 UTC release day; Fastly, Akamai, Imperva shipped equivalents). Protects only traffic that passes through the WAF. Cloudflare's CTO calls these 'a STOPGAP only.'" },
-    { "control": "Block the trigger class", "detail": "Every known trigger is a multipart/form-data request. Reject multipart at nginx/Apache, or allow only GET/HEAD on read-only storefronts. Breaks uploads and some checkout flows — test first." }
+    { "control": "Block the trigger class", "detail": "Every known trigger is a multipart/form-data request. Reject multipart at nginx/Apache, or allow only GET/HEAD on read-only storefronts. Breaks uploads and some checkout flows - test first." }
   ],
   "detection_signals": [
     "php-fpm / php-cgi / httpd / apache2 spawning a shell, interpreter, or download tool",
@@ -19,5 +19,5 @@
     "New .php files appearing in web roots",
     "New cron jobs, users, or SSH keys on a web host"
   ],
-  "assume_breach_window": "Any host that was internet-reachable and unpatched after 2026-10-20 should be treated as potentially compromised: hunt webshells and persistence, and rotate DB credentials, API keys, session secrets, and TLS keys — the memory-disclosure path leaks them without RCE."
+  "assume_breach_window": "Any host that was internet-reachable and unpatched after 2026-10-20 should be treated as potentially compromised: hunt webshells and persistence, and rotate DB credentials, API keys, session secrets, and TLS keys - the memory-disclosure path leaks them without RCE."
 }

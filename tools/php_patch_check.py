@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-php_patch_check.py — PHP2Shell patch-status checker
+php_patch_check.py - PHP2Shell patch-status checker
 ===================================================
 
 Determines whether a PHP version is exposed to PHP2Shell
@@ -31,8 +31,8 @@ Usage
 Exit codes (useful in CI / cron gates)
 --------------------------------------
   0  all checked versions SAFE
-  1  at least one VULNERABLE — patch available (supported branch)
-  2  at least one VULNERABLE — no upstream fix / abandoned (EOL)
+  1  at least one VULNERABLE - patch available (supported branch)
+  2  at least one VULNERABLE - no upstream fix / abandoned (EOL)
   3  usage or data error
 
 Update the fixed builds in data/affected_versions.json as PHP ships new patch
@@ -125,7 +125,7 @@ def classify(raw_version, matrix):
         result["note"] = "Branch %s is not in the matrix." % bkey
         v = verdicts["unknown"]
         result.update(verdict="unknown", severity=v["severity"], label=v["label"],
-                      action="Unknown branch — confirm against php.net and treat as exposed until verified.")
+                      action="Unknown branch - confirm against php.net and treat as exposed until verified.")
         return result
 
     result["branch_status"] = branch["status"]
@@ -147,7 +147,7 @@ def classify(raw_version, matrix):
             v = verdicts["verify-vendor"]
             result.update(verdict="verify-vendor", severity=v["severity"], label=v["label"],
                           action=("Distro/custom package below upstream %s. The fix may be backported "
-                                  "without bumping the number — confirm against your vendor's security "
+                                  "without bumping the number - confirm against your vendor's security "
                                   "advisory before trusting the version alone." % branch["fixed_build"]))
             result["note"] = "Package suffix detected; upstream arithmetic is not authoritative for distro builds."
             return result
